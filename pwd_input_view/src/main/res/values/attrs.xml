@@ -8,7 +8,7 @@
         <attr name="isCursorEnable" format="boolean" />
         <attr name="isCipherEnable" format="boolean" />
         <attr name="pwdPadding" format="dimension|reference" />
-        <!--<attr name="cipherTextSize" format="dimension" />-->
+        <attr name="borderWidth" format="dimension|reference" />
         <attr name="mode">
             <enum name="cheek" value="1001" />
             <enum name="underline" value="1002" />

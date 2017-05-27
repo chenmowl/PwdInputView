@@ -22,9 +22,24 @@
             android:layout_marginTop="30dp"
             app:borderColor="@color/colorAccent"
             app:cursorColor="@color/colorPrimary"
+            app:borderWidth="2dp"
             app:isCipherEnable="true"
             app:isCursorEnable="true"
             app:mode="underline"
+            app:pwdLength="6" />
+
+
+        <com.eme.pwd_input_view.PwdInputView
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            app:borderColor="@color/colorAccent"
+            app:cursorColor="@color/colorPrimary"
+            app:borderWidth="2dp"
+            app:isCipherEnable="true"
+            app:isCursorEnable="true"
+            app:mode="cheek"
             app:pwdLength="6" />
 
     </LinearLayout>
