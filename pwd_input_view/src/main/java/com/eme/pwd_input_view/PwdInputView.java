@@ -1,6 +1,7 @@
 package com.eme.pwd_input_view;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -83,37 +84,39 @@ public class PwdInputView extends View {
 
     public PwdInputView(Context context) {
         super(context);
-        init();
     }
 
     public PwdInputView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(attrs);
     }
 
     public PwdInputView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(attrs);
     }
 
-    private void init() {
+    private void init(AttributeSet attrs) {
+        TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.PwdInput);
+        borderColor = ta.getColor(R.styleable.PwdInput_borderColor, Color.GRAY);
+        cursorColor = ta.getColor(R.styleable.PwdInput_cursorColor, Color.GRAY);
+        pwdLength = ta.getInt(R.styleable.PwdInput_pwdLength, 6);
+        isCursorEnable = ta.getBoolean(R.styleable.PwdInput_isCursorEnable, true);
+        isCipherEnable = ta.getBoolean(R.styleable.PwdInput_isCipherEnable, true);
+        pwdPadding = dp2px(getContext(), ta.getDimension(R.styleable.PwdInput_pwdPadding, 2));
+        mode = ta.getInt(R.styleable.PwdInput_mode, BORDER_STYLE_CHEEK);
+        ta.recycle();
+
         setFocusableInTouchMode(true);
         setOnKeyListener(new PwdKeyListener());
         inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        pwdLength = 6;
         if (mPaint == null) {
             mPaint = new Paint();
         }
         pwdData = new String[pwdLength];
         cursorFlashTime = 500;
-        pwdPadding = dp2px(getContext(), 2);
-        borderColor = Color.GRAY;
         borderWidth = dp2px(getContext(), 2);
-        cursorColor = Color.GRAY;
-        isCursorEnable = true;
-        isCipherEnable = true;
-        mode = BORDER_STYLE_UNDERLINE;
 
         timerTask = new TimerTask() {
 
@@ -368,7 +371,7 @@ public class PwdInputView extends View {
                     canvas.drawText(CIPHER_TEXT, getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, paint);
                 } else {
                     //不开启密文
-                    canvas.drawText(pwdData[i], getPaddingLeft() + pwdSize / 2 + (pwdSize / 2 + pwdPadding) * i, getPaddingTop() + y, paint);
+                    canvas.drawText(pwdData[i], getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, paint);
                 }
             }
         }
