@@ -16,17 +16,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.eme.pwd_input_view.PwdInputView
-            android:layout_width="300dp"
-            android:layout_height="30dp"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             app:borderColor="@color/colorAccent"
             app:cursorColor="@color/colorPrimary"
-            app:isCipherEnable="false"
+            app:isCipherEnable="true"
             app:isCursorEnable="true"
             app:mode="underline"
-            app:pwdLength="7"
-            app:pwdPadding="2dp" />
+            app:pwdLength="6" />
 
     </LinearLayout>
 

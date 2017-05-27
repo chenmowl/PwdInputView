@@ -61,8 +61,11 @@ public class PwdInputView extends View {
     private boolean isCipherEnable;//是否开启密文
     private static String CIPHER_TEXT = "*";//密文符号
 
+
     private int mode;//边框样式
     private Paint mPaint;//边框画笔
+    private Paint cursorPaint;//焦点画笔
+    private Paint cipherPaint;//文字画笔
 
     private String[] pwdData;//存储密码数据
 
@@ -111,12 +114,30 @@ public class PwdInputView extends View {
         setOnKeyListener(new PwdKeyListener());
         inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
+
+        borderWidth = dp2px(getContext(), 2);
+        //光标宽度
+        cursorWidth = dp2px(getContext(), 2);
         if (mPaint == null) {
             mPaint = new Paint();
+            mPaint.setColor(borderColor);
+            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setStrokeWidth(borderWidth);
+        }
+        if (cursorPaint == null) {
+            cursorPaint = new Paint();
+            cursorPaint.setStrokeWidth(cursorWidth);
+            cursorPaint.setColor(cursorColor);
+            cursorPaint.setStyle(Paint.Style.FILL);
+        }
+        if (cipherPaint == null) {
+            cipherPaint = new Paint();
+            cipherPaint.setColor(Color.GRAY);
+            cipherPaint.setTextAlign(Paint.Align.CENTER);
+            cipherPaint.setStyle(Paint.Style.FILL);
         }
         pwdData = new String[pwdLength];
         cursorFlashTime = 500;
-        borderWidth = dp2px(getContext(), 2);
 
         timerTask = new TimerTask() {
 
@@ -232,6 +253,7 @@ public class PwdInputView extends View {
             case AT_MOST:
                 //没有指定大小，控件的宽度＝单个密码框的宽度 * 密码位数 + 密码框间隔 * （密码位数 - 1）
                 width = pwdSize * pwdLength + pwdPadding * (pwdLength - 1);
+                pwdSize = dp2px(getContext(), 20);//给每个密码单元设置一个默认的宽度
                 break;
         }
         setMeasuredDimension(width, pwdSize);
@@ -242,8 +264,6 @@ public class PwdInputView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         //密码文本大小
         cipherTextSize = pwdSize / 2;
-        //光标宽度
-        cursorWidth = dp2px(getContext(), 2);
         //光标长度
         cursorHeight = pwdSize / 2;
     }
@@ -258,66 +278,62 @@ public class PwdInputView extends View {
         super.onDraw(canvas);
         switch (mode) {
             case BORDER_STYLE_CHEEK:
-//                drawUnderline(canvas, borderPaint);
-                drawCheek(canvas, mPaint);
+                //方框样式
+                drawCheek(canvas);
                 break;
             case BORDER_STYLE_UNDERLINE:
-                drawCheek(canvas, mPaint);
+                //下划线样式
+                drawUnderline(canvas);
                 break;
         }
         //画游标
-        drawCursor(canvas, mPaint);
+        drawCursor(canvas);
         //画密文符号
-        drawCipherText(canvas, mPaint);
-        //画边框
-//        drawRect(canvas, mPaint);
-    }
-
-    /**
-     * 画边框
-     *
-     * @param canvas
-     * @param paint
-     */
-    private void drawRect(Canvas canvas, Paint paint) {
-        //画笔初始化
-        paint.setColor(borderColor);
-        paint.setStrokeWidth(borderWidth);
-        paint.setStyle(Paint.Style.STROKE);
-        //文字居中的处理
-        Rect rect = new Rect();
-        canvas.getClipBounds(rect);
-        canvas.drawRect(rect, paint);
+        drawCipherText(canvas);
     }
 
     /**
      * 画方框
      *
      * @param canvas
-     * @param borderPaint
      */
-    private void drawUnderline(Canvas canvas, Paint borderPaint) {
-
+    private void drawCheek(Canvas canvas) {
+//        mPaint.setStyle(Paint.Style.STROKE);
+//        mPaint.setStrokeWidth(borderWidth);
+//        Rect rect = new Rect();
+//        canvas.getClipBounds(rect);
+//        canvas.drawRect(rect, mPaint);
+        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setStrokeWidth(borderWidth);
+        canvas.drawLine(0, 0, getWidth(), 0, mPaint);
+        canvas.drawLine(0, pwdSize, getWidth(), pwdSize, mPaint);
+        canvas.drawLine(0, 0, 0, pwdSize, mPaint);
+        canvas.drawLine(getWidth(), 0, getWidth(), pwdSize, mPaint);
+        mPaint.setStrokeWidth(borderWidth/2);
+        for (int i = 1; i < pwdLength; i++) {
+            //根据密码位数绘制中间分割线
+            //起始点x=paddingLeft+单个密码单元大小+(密码框边距-分割线宽度)/2 * i
+            //起始点y=分割线宽度
+            //终止点x=起始点+分割线宽度
+            //终止点y=分割线宽度+paddingTop+单个密码单元大小+paddingBottom
+            canvas.drawLine(getPaddingLeft() + (pwdSize + pwdPadding) * i - pwdPadding / 2, 0, getPaddingLeft() + (pwdSize + pwdPadding) * i - pwdPadding / 2,
+                    borderWidth + getPaddingTop() + pwdSize + getPaddingBottom(), mPaint);
+        }
     }
 
     /**
      * 绘制下划线
      *
      * @param canvas
-     * @param borderPaint
      */
-    private void drawCheek(Canvas canvas, Paint borderPaint) {
-        //画笔初始化
-        borderPaint.setColor(borderColor);
-//        borderPaint.setStrokeWidth(borderWidth);
-        borderPaint.setStyle(Paint.Style.FILL);
+    private void drawUnderline(Canvas canvas) {
         for (int i = 0; i < pwdLength; i++) {
             //根据密码位数绘制下划线
             //起始点x=paddingLeft+(单个密码单元大小+密码框边距)*i
             //起始点y=paddingTop+单个密码框大小
             //终止点x=起始点+单个密码框大小,终止点y与起始点一样不变
             canvas.drawLine(getPaddingLeft() + (pwdSize + pwdPadding) * i, getPaddingTop() + pwdSize,
-                    getPaddingLeft() + (pwdSize + pwdPadding) * i + pwdSize, getPaddingTop() + pwdSize, borderPaint);
+                    getPaddingLeft() + (pwdSize + pwdPadding) * i + pwdSize, getPaddingTop() + pwdSize, mPaint);
         }
     }
 
@@ -325,12 +341,8 @@ public class PwdInputView extends View {
      * 绘制光标
      *
      * @param canvas
-     * @param paint
      */
-    private void drawCursor(Canvas canvas, Paint paint) {
-        paint.setColor(cursorColor);
-        paint.setStrokeWidth(cursorWidth);
-        paint.setStyle(Paint.Style.FILL);
+    private void drawCursor(Canvas canvas) {
         //绘制光标的前提：光标未显示&开启光标&输入位数未满&获得焦点
         if (!isCursorShowing && isCursorEnable && !isInputComplete && hasFocus()) {
             //起始点x=paddingLeft+单个密码框／2+(单个密码框大小+密码框间距)*i
@@ -338,7 +350,7 @@ public class PwdInputView extends View {
             //终止点x=起始点x
             //终止点y=起始点y+光标高度
             canvas.drawLine(getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * cursorPosition, getPaddingTop() + (pwdSize - cursorHeight) / 2,
-                    getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * cursorPosition, getPaddingTop() + (pwdSize - cursorHeight) / 2 + cursorHeight, paint);
+                    getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * cursorPosition, getPaddingTop() + (pwdSize - cursorHeight) / 2 + cursorHeight, cursorPaint);
         }
     }
 
@@ -346,19 +358,15 @@ public class PwdInputView extends View {
      * 画密文符号
      *
      * @param canvas
-     * @param paint
      */
-    private void drawCipherText(Canvas canvas, Paint paint) {
-        //画笔的初始化
-        paint.setColor(Color.GRAY);
-        paint.setTextSize(cipherTextSize);
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setStyle(Paint.Style.FILL);
+    private void drawCipherText(Canvas canvas) {
+        //画笔设置
+        cipherPaint.setTextSize(cipherTextSize);
         //文字居中的处理
         Rect rect = new Rect();
         canvas.getClipBounds(rect);
         int cHeight = rect.height();
-        paint.getTextBounds(CIPHER_TEXT, 0, CIPHER_TEXT.length(), rect);
+        cipherPaint.getTextBounds(CIPHER_TEXT, 0, CIPHER_TEXT.length(), rect);
         float y = cHeight / 2f + rect.height() / 2f - rect.bottom;
         //根据输入密码的位数，进行for循环绘制
         for (int i = 0; i < pwdLength; i++) {
@@ -368,10 +376,10 @@ public class PwdInputView extends View {
                 if (isCipherEnable) {
                     //开启密文
 //                    canvas.drawText(CIPHER_TEXT, getPaddingLeft() + pwdSize / 2 + (pwdSize / 2 + pwdPadding) * i, getPaddingTop() + y, paint);
-                    canvas.drawText(CIPHER_TEXT, getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, paint);
+                    canvas.drawText(CIPHER_TEXT, getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, cipherPaint);
                 } else {
                     //不开启密文
-                    canvas.drawText(pwdData[i], getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, paint);
+                    canvas.drawText(pwdData[i], getPaddingLeft() + pwdSize / 2 + (pwdSize + pwdPadding) * i, getPaddingTop() + y, cipherPaint);
                 }
             }
         }
@@ -505,7 +513,7 @@ public class PwdInputView extends View {
      *
      * @return
      */
-    private String getPwdInfo() {
+    public String getPwdInfo() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < pwdLength; i++) {
             if (!TextUtils.isEmpty(pwdData[i])) {
