@@ -106,8 +106,8 @@ public class PwdInputView extends View {
         pwdLength = ta.getInt(R.styleable.PwdInput_pwdLength, 6);
         isCursorEnable = ta.getBoolean(R.styleable.PwdInput_isCursorEnable, true);
         isCipherEnable = ta.getBoolean(R.styleable.PwdInput_isCipherEnable, true);
-        pwdPadding = (int) ta.getDimension(R.styleable.PwdInput_pwdPadding, 2);
-        borderWidth = (int) ta.getDimension(R.styleable.PwdInput_borderWidth, 2);
+        pwdPadding = ta.getDimensionPixelSize(R.styleable.PwdInput_pwdPadding, 2);
+        borderWidth = ta.getDimensionPixelSize(R.styleable.PwdInput_borderWidth, 2);
         mode = ta.getInt(R.styleable.PwdInput_mode, BORDER_STYLE_CHEEK);
         ta.recycle();
 
